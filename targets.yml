@@ -1,0 +1,5 @@
+targets:
+  - address: https://newsnn.ru
+    method: post
+  - address: https://newsnn.ru
+    method: get
