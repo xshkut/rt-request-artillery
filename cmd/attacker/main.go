@@ -8,7 +8,7 @@ import (
 )
 
 var help = flag.Bool("help", false, "Print help")
-var coordinatorAddress = flag.String("connect", "ws://127.0.0.1:9000", "Address of coordinator server (with protocol)")
+var coordinatorAddress = flag.String("connect", internal.COORDINATOR_DEFAULT_ADDRESS, "Address of coordinator server (with protocol)")
 var maxRate = flag.Int("max-rate", 100, "Maximal rate of outgoing requests")
 
 func init() {

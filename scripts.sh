@@ -22,6 +22,8 @@ docker run -v $(pwd)/docker-images/coordinator:/outfile -v $(pwd):/app --workdir
 
 ## In folder with binary
 # Build
-docker build --no-cache -t "tbsitg/artillery-coordinator:v1.0.0" .
+docker build --no-cache -t "tbsitg/artillery-coordinator" .
 # Publish
-docker push tbsitg/artillery-coordinator:v1.0.0
+docker push tbsitg/artillery-coordinator
+# Run
+docker run -it tbsitg/artillery-coordinator
