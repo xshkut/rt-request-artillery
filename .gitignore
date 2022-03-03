@@ -1,1 +1,5 @@
 
+docker-images/attacker/attacker
+docker-images/coordinator/coordinator
+attacker
+coordinator
