@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"gra/m/v2/internal"
-	"log"
 	"os"
 	"time"
 
@@ -112,7 +111,7 @@ func startCheckingAddress(address string, addrStateCh chan<- addressState) {
 	for {
 		addrState, err := checkAddress(address)
 		if err != nil {
-			log.Println(errors.Wrap(err, "Cannot check server status"))
+			logger.Info(errors.Wrap(err, "Cannot check server status"))
 			time.Sleep(time.Second * 1)
 			continue
 		}
@@ -164,7 +163,7 @@ func getConfig(filePath string) (avs []internal.AttackVector, err error) {
 
 	err = yaml.Unmarshal(dat, &cfg)
 	if err != nil {
-		log.Fatalf("error: %v", err)
+		logger.Info("error: %v", err)
 	}
 
 	avs = cfg.Targets

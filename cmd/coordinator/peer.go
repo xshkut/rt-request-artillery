@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"gra/m/v2/internal"
-	"log"
 	"net"
 	"sync"
 
@@ -22,11 +22,11 @@ func createPeer(ipMap map[string]mapset.Set) (*roletalk.Peer, error) {
 	peer.AddKey("superkey", "superpassword")
 
 	peer.Destination(internal.ATTACKER_ROLE_NAME).OnUnit(func(u *roletalk.Unit) {
-		log.Println("Connected new attacker:", u.Name(), ". Initiating...")
+		logger.Info("Connected new attacker:", u.Name(), ". Initiating...")
 
 		res, err := peer.Destination(internal.ATTACKER_ROLE_NAME).Request(internal.INTRODUCE_EVENT, roletalk.EmitOptions{Data: "Hello!!!!", Unit: u})
 		if err != nil {
-			log.Println(errors.Wrap(err, "cannot congratulate unit"))
+			logger.Info(errors.Wrap(err, "cannot congratulate unit"))
 			return
 		}
 
@@ -41,8 +41,8 @@ func createPeer(ipMap map[string]mapset.Set) (*roletalk.Peer, error) {
 			return
 		}
 
-		log.Println("Attacker intiated:")
-		log.Printf("%+v", result)
+		logger.Info("Attacker intiated:")
+		logger.Info(fmt.Sprintf("%+v", result))
 
 		ip := result.Query
 
@@ -60,7 +60,7 @@ func createPeer(ipMap map[string]mapset.Set) (*roletalk.Peer, error) {
 			ipMapMx.Lock()
 			defer ipMapMx.Unlock()
 
-			log.Println("Attacker disconnected:", u.Name())
+			logger.Info("Attacker disconnected:", u.Name())
 
 			ipMap[ip].Remove(u)
 
@@ -76,7 +76,7 @@ func createPeer(ipMap map[string]mapset.Set) (*roletalk.Peer, error) {
 		return nil, err
 	}
 
-	log.Printf("Listening on %v", addr)
+	logger.Info(fmt.Sprintf("Listening on %v", addr))
 
 	return peer, nil
 }

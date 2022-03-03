@@ -5,11 +5,15 @@ import (
 	"gra/m/v2/internal"
 	"os"
 	"sync"
+
+	"github.com/withmandala/go-log"
 )
 
 var help = flag.Bool("help", false, "Print help")
 var coordinatorAddress = flag.String("connect", internal.COORDINATOR_DEFAULT_ADDRESS, "Address of coordinator server (with protocol)")
 var maxRate = flag.Int("max-rate", 100, "Maximal rate of outgoing requests")
+
+var logger *log.Logger = log.New(os.Stdout)
 
 func init() {
 	flag.BoolVar(help, "h", *help, "alias for --help")
@@ -22,6 +26,8 @@ func init() {
 		internal.ArgsUsage()
 		os.Exit(0)
 	}
+
+	logger.Info("Max request rate limit:", *maxRate, ". Use --max-rate (-m) for adjusting.")
 }
 
 func main() {

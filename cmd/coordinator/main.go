@@ -3,17 +3,19 @@ package main
 import (
 	"flag"
 	"gra/m/v2/internal"
-	"log"
 	"os"
 	"sync"
 
 	mapset "github.com/deckarep/golang-set"
 	"github.com/pkg/errors"
+	"github.com/withmandala/go-log"
 	"github.com/xshkut/roletalk-go"
 )
 
 var help = flag.Bool("help", false, "Print help")
 var bindAddress = flag.String("bind", "0.0.0.0:9000", "Bind address")
+
+var logger *log.Logger = log.New(os.Stdout)
 
 func init() {
 	flag.BoolVar(help, "h", *help, "alias for --help")
@@ -32,13 +34,13 @@ func main() {
 
 	config, err := getConfig("targets.yml")
 	if err != nil {
-		log.Fatalln(errors.Wrap(err, "cannot read config"))
+		logger.Fatal(errors.Wrap(err, "cannot read config"))
 		return
 	}
 
 	peer, err := createPeer(ipMap)
 	if err != nil {
-		log.Fatalln(errors.Wrap(err, "Cannot listen"))
+		logger.Fatal(errors.Wrap(err, "Cannot listen"))
 	}
 
 	for _, av := range config {
@@ -60,6 +62,6 @@ func coordinate(peer *roletalk.Peer, ipMap map[string]mapset.Set, av internal.At
 
 	err := consumeRate(av.Address, av.Method, rateCh, peer, ipMap)
 	if err != nil {
-		log.Fatalln(errors.Wrap(err, "cannot comsume rate"))
+		logger.Fatal(errors.Wrap(err, "cannot comsume rate"))
 	}
 }

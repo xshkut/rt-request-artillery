@@ -2,7 +2,6 @@ package main
 
 import (
 	"gra/m/v2/internal"
-	"log"
 
 	"github.com/pkg/errors"
 	"github.com/xshkut/roletalk-go"
@@ -17,11 +16,11 @@ func createPeer() *roletalk.Peer {
 	coordinator := peer.Destination(internal.COORDINATOR_ROLE_NAME)
 
 	coordinator.OnClose(func() {
-		log.Println("Coordinator disconnected")
+		logger.Info("Coordinator disconnected")
 	})
 
 	coordinator.OnUnit(func(u *roletalk.Unit) {
-		log.Println("Connected coordinator:", u.Name())
+		logger.Info("Connected coordinator:", u.Name())
 	})
 
 	peer.Role(internal.ATTACKER_ROLE_NAME).OnRequest(internal.INTRODUCE_EVENT, func(im *roletalk.RequestContext) {
@@ -29,11 +28,11 @@ func createPeer() *roletalk.Peer {
 		if error != nil {
 			err := errors.Wrap(error, "cannot get my ip")
 			im.Reject(err)
-			log.Fatalln(err.Error())
+			logger.Fatal(err.Error())
 			return
 		}
 
-		log.Println("My info:", myInfo)
+		logger.Info("My info:", myInfo)
 
 		im.Reply(myInfo)
 	})
@@ -44,6 +43,6 @@ func createPeer() *roletalk.Peer {
 func connectPeer(peer *roletalk.Peer, address string) {
 	_, err := peer.Connect(address, roletalk.ConnectOptions{})
 	if err != nil {
-		log.Println("Cannot connect to coordinator. Will periodically try... Error:", err.Error())
+		logger.Warn("Cannot connect to coordinator. Will periodically try...")
 	}
 }
