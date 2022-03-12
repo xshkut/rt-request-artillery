@@ -134,12 +134,7 @@ func checkAddress(address string) (state addressState, err error) {
 	var status int
 
 	status, err = internal.MakeUserRequest(address)
-	if err != nil && status >= 500 {
-		return
-	}
-
-	if status == 429 {
-		err = fmt.Errorf("got status %v", status)
+	if err != nil && status == 0 {
 		return
 	}
 
