@@ -71,6 +71,8 @@ func distributeAttackVector(ac internal.AttackConfig, peer *roletalk.Peer, rate 
 		return nil
 	}
 
+	logger.Infof("Distributing rate for [%v]: %v\n", ac.Address, int(rate))
+
 	for _, unitSet := range ipMap {
 		unitCount := unitSet.Cardinality()
 		if unitCount == 0 {
@@ -132,11 +134,11 @@ func checkAddress(address string) (state addressState, err error) {
 	var status int
 
 	status, err = internal.MakeUserRequest(address)
-	if err != nil {
+	if err != nil && status >= 500 {
 		return
 	}
 
-	if status != 200 {
+	if status == 429 {
 		err = fmt.Errorf("got status %v", status)
 		return
 	}

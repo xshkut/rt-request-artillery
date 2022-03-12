@@ -14,7 +14,7 @@ docker build --no-cache -t "tbsitg/artillery-attacker:latest" ./docker-images/at
 # Publish
 docker push tbsitg/artillery-attacker:latest
 # Run
-docker run -it tbsitg/artillery-attacker:latest
+docker run -it --pull always tbsitg/artillery-attacker:latest
 
 ### COORDINATOR
 # Compile for alpine
