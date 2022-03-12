@@ -120,7 +120,7 @@ func startCheckingAddress(address string, addrStateCh chan<- addressState) {
 			continue
 		}
 
-		logger.Info(fmt.Sprintf("Got server status (%v): %v", address, addrState.status))
+		logger.Info(fmt.Sprintf("Got server status [%v]: %v (%v ms)", address, addrState.status, addrState.responseTime))
 
 		addrStateCh <- addrState
 
