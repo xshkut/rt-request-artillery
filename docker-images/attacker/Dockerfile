@@ -6,4 +6,5 @@ RUN mkdir /app
 WORKDIR /app
 COPY . .
 
-CMD "/app/attacker"
+ENTRYPOINT ["/app/attacker"]
+CMD []
