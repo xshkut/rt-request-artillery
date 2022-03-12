@@ -1,0 +1,13 @@
+targets:
+  # - address: https://newsnn.ru
+  #   method: post
+  # - address: https://newsnn.ru
+  #   method: get
+  # - address: https://expert.ru/
+  #   method: post
+  # - address: https://expert.ru/
+  #   method: get
+  - address: https://www.e1.ru
+    methods:
+    - get
+    - post

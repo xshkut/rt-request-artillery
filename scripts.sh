@@ -9,7 +9,6 @@ mkdir -p docker-images/attacker
 ### ATTACKER
 # Compile for alpine
 docker run -v $(pwd)/docker-images/attacker:/outfile -v $(pwd):/app --workdir="/app" --env CGO_ENABLED=0 golang:latest go build -o /outfile ./cmd/attacker
-
 # Build
 docker build --no-cache -t "tbsitg/artillery-attacker:latest" ./docker-images/attacker
 # Publish
@@ -23,6 +22,6 @@ docker run -v $(pwd)/docker-images/coordinator:/outfile -v $(pwd):/app --workdir
 # Build
 docker build --no-cache -t "tbsitg/artillery-coordinator:latest" ./docker-images/coordinator
 # Publish
-docker push tbsitg/artillery-coordinator:latest
+# docker push tbsitg/artillery-coordinator:latest
 # Run
 docker run -it -v $(pwd)/targets.yml:/app/targets.yml -p 9000:9000 tbsitg/artillery-coordinator:latest

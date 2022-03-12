@@ -22,3 +22,8 @@ type AttackVector struct {
 	Address string  `json:"address,omitempty" yaml:"address"`
 	Method  string  `json:"method,omitempty" yaml:"method"`
 }
+
+type AttackConfig struct {
+	Address string   `json:"address,omitempty" yaml:"address"`
+	Methods []string `json:"methods,omitempty" yaml:"methods"`
+}

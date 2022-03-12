@@ -8,14 +8,13 @@ import (
 
 	mapset "github.com/deckarep/golang-set"
 	"github.com/pkg/errors"
-	"github.com/valyala/fasthttp"
 	"github.com/xshkut/roletalk-go"
 	"gopkg.in/yaml.v2"
 )
 
 const TARGET_RESPONSE_TIME_SEC = 60
 
-func rateProcessor(addrStateCh <-chan addressState, rateCh chan<- float64, peer *roletalk.Peer) {
+func updateRate(addrStateCh <-chan addressState, rateCh chan<- float64, peer *roletalk.Peer) {
 	var currentRate float64 = 0
 
 	lastTime := time.Now()
@@ -53,9 +52,9 @@ func computeNewRate(status int, responseTime float64, oldRate float64, timeDiff 
 	return newRate
 }
 
-func consumeRate(address string, method string, rateCh <-chan float64, peer *roletalk.Peer, ipMap map[string]mapset.Set) error {
+func downstreamAttackVectors(ac internal.AttackConfig, rateCh <-chan float64, peer *roletalk.Peer, ipMap map[string]mapset.Set) error {
 	for rate := range rateCh {
-		err := transmitAttackVector(address, method, peer, rate, ipMap)
+		err := distributeAttackVector(ac, peer, rate, ipMap)
 
 		if err != nil {
 			return errors.Wrap(err, "Cannot transmit attack vector")
@@ -65,7 +64,7 @@ func consumeRate(address string, method string, rateCh <-chan float64, peer *rol
 	return nil
 }
 
-func transmitAttackVector(address string, method string, peer *roletalk.Peer, rate float64, ipMap map[string]mapset.Set) error {
+func distributeAttackVector(ac internal.AttackConfig, peer *roletalk.Peer, rate float64, ipMap map[string]mapset.Set) error {
 	ipCount := len(ipMap)
 
 	if ipCount == 0 {
@@ -81,20 +80,23 @@ func transmitAttackVector(address string, method string, peer *roletalk.Peer, ra
 
 		reqRatio := 1.0 / float64(ipCount) / float64(unitCount)
 
-		av := internal.AttackVector{
-			Rate:    rate * reqRatio,
-			Address: address,
-			Method:  method,
-		}
-
-		for unit := range unitSet.Iter() {
-			u, ok := unit.(*roletalk.Unit)
-			if !ok {
-				return errors.New("Expected type *Unit in unitSet")
+		for _, method := range ac.Methods {
+			av := internal.AttackVector{
+				Rate:    rate * reqRatio,
+				Address: ac.Address,
+				Method:  method,
 			}
 
-			go peer.Destination(internal.ATTACKER_ROLE_NAME).Send(internal.ATTACK_VECTOR_EVENT, roletalk.EmitOptions{Unit: u, Data: av})
+			for unit := range unitSet.Iter() {
+				u, ok := unit.(*roletalk.Unit)
+				if !ok {
+					return errors.New("Expected type *Unit in unitSet")
+				}
+
+				go peer.Destination(internal.ATTACKER_ROLE_NAME).Send(internal.ATTACK_VECTOR_EVENT, roletalk.EmitOptions{Unit: u, Data: av})
+			}
 		}
+
 	}
 
 	return nil
@@ -111,27 +113,25 @@ func startCheckingAddress(address string, addrStateCh chan<- addressState) {
 	for {
 		addrState, err := checkAddress(address)
 		if err != nil {
-			logger.Info(errors.Wrap(err, "Cannot check server status"))
-			time.Sleep(time.Second * 1)
+			logger.Info(errors.Wrap(err, fmt.Sprintf("Cannot check server status (%v)", address)))
+			time.Sleep(time.Second * 5)
 			continue
 		}
 
+		logger.Info(fmt.Sprintf("Got server status (%v): %v", address, addrState.status))
+
 		addrStateCh <- addrState
 
-		time.Sleep(time.Second * 1)
+		time.Sleep(time.Second * 5)
 	}
 }
 
 func checkAddress(address string) (state addressState, err error) {
 	startTime := time.Now()
 
-	client := fasthttp.Client{}
-
-	body := make([]byte, 0)
-
 	var status int
 
-	status, _, err = client.Get(body, address)
+	status, err = internal.MakeUserRequest(address)
 	if err != nil {
 		return
 	}
@@ -147,10 +147,10 @@ func checkAddress(address string) (state addressState, err error) {
 }
 
 type config struct {
-	Targets []internal.AttackVector `yaml:"targets"`
+	Targets []internal.AttackConfig `yaml:"targets"`
 }
 
-func getConfig(filePath string) (avs []internal.AttackVector, err error) {
+func getConfig(filePath string) (avs []internal.AttackConfig, err error) {
 	var dat []byte
 
 	dat, err = os.ReadFile(filePath)

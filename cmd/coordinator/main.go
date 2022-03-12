@@ -43,8 +43,8 @@ func main() {
 		logger.Fatal(errors.Wrap(err, "Cannot listen"))
 	}
 
-	for _, av := range config {
-		go coordinate(peer, ipMap, av)
+	for _, ac := range config {
+		go coordinate(peer, ipMap, ac)
 	}
 
 	wg := sync.WaitGroup{}
@@ -52,15 +52,15 @@ func main() {
 	wg.Wait()
 }
 
-func coordinate(peer *roletalk.Peer, ipMap map[string]mapset.Set, av internal.AttackVector) {
+func coordinate(peer *roletalk.Peer, ipMap map[string]mapset.Set, ac internal.AttackConfig) {
 	addrStateCh := make(chan addressState)
 	rateCh := make(chan float64, 1)
 
-	go startCheckingAddress(av.Address, addrStateCh)
+	go startCheckingAddress(ac.Address, addrStateCh)
 
-	go rateProcessor(addrStateCh, rateCh, peer)
+	go updateRate(addrStateCh, rateCh, peer)
 
-	err := consumeRate(av.Address, av.Method, rateCh, peer, ipMap)
+	err := downstreamAttackVectors(ac, rateCh, peer, ipMap)
 	if err != nil {
 		logger.Fatal(errors.Wrap(err, "cannot comsume rate"))
 	}

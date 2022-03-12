@@ -116,7 +116,9 @@ func runPostAttack(address string) error {
 	}
 
 	req.Header.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:97.0) Gecko/20100101 Firefox/97.0")
-	req.Header.Add("Connection", "keep-alive")
+	req.Header.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
+	req.Header.Add("Accept-Language", "ru,en-US;q=0.7,en;q=0.3")
+	req.Header.Add("Accept-Encoding", "gzip, deflate, br")
 
 	res, err = http.DefaultClient.Do(req)
 	if err != nil {
